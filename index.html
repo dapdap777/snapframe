@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f6f8f7">
+  <meta name="theme-color" content="#f3f5f1">
   <meta name="description" content="给截图一个好看的背景。免费、无需登录，图片仅在浏览器本地处理，轻松导出清晰 PNG。">
   <title>映框 Snapframe · 截图美化工具</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
@@ -12,47 +12,46 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="./" aria-label="映框首页"><span class="brand-symbol" aria-hidden="true"><i></i></span><strong>映框<span>Snapframe</span></strong></a>
-    <span class="privacy"><span class="status-dot"></span>图片只留在你的浏览器</span>
+    <a class="brand" href="./" aria-label="映框首页"><img class="brand-mark" src="./favicon.svg" alt="" width="32" height="32"><strong>映框</strong><span>Snapframe</span></a>
+    <p class="privacy"><span class="status-dot" aria-hidden="true"></span>图片只在本机处理，不会上传</p>
   </header>
   <main>
     <section class="intro">
-      <div><p class="eyebrow">A LITTLE FRAME. A BETTER SCREENSHOT.</p><h1>好截图，也值得好好呈现<span>。</span></h1><p class="intro-copy">放入截图，调一调，让每一次分享都更出彩。</p></div>
-      <div class="intro-note"><span aria-hidden="true">✦</span> 给灵感，留一点呼吸感</div>
+      <h1>给截图装一个好看的框</h1>
+      <p>加上背景、留白、圆角和投影，导出清晰的 PNG。</p>
     </section>
     <div class="workspace">
       <section class="preview-panel" aria-label="截图预览">
-        <div class="panel-heading"><div><span class="live-dot"></span><h2>实时预览</h2></div><span id="preview-label">示例效果</span></div>
-        <div class="preview-stage" id="drop-zone" tabindex="0" role="button" aria-label="拖拽一张图片到此处，或按回车选择图片" aria-describedby="upload-help">
-          <canvas id="preview" aria-label="美化后的截图预览"></canvas>
-          <div class="drop-overlay"><span aria-hidden="true">↓</span><strong>松开，放入你的截图</strong></div>
+        <div class="preview-stage" id="drop-zone">
+          <div class="canvas-wrap"><canvas id="preview" aria-label="美化后的截图预览"></canvas></div>
+          <div class="stage-caption"><span id="preview-label">示例效果</span><span class="stage-size"><span class="stage-size-key">导出尺寸</span><span id="dimensions">正在生成示例…</span></span></div>
+          <div class="drop-overlay" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 19h14"/></svg><strong>松开即可放入截图</strong></div>
         </div>
-        <div class="preview-bottom"><span id="dimensions">正在生成示例…</span><span>预览自动适应窗口 · 导出保留画质</span></div>
         <div class="upload-card">
-          <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.5"/><path d="m4 18 5-5 4 3 3-5 5 6"/></svg></span>
-          <div><strong id="file-name">换上你的截图，开始创作</strong><p id="upload-help">拖拽到预览区，或选择图片 · PNG / JPG / WebP · 最大 32 MB</p></div>
-          <button class="button secondary" id="upload-button" type="button">选择图片<span aria-hidden="true">↗</span></button>
+          <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17.5 4.6-4.2 3.4 2.7 3.1-3.6 4.9 5.1"/></svg></span>
+          <div><strong id="file-name">放入你的截图</strong><p id="upload-help">拖到上方预览区，或点击选择。支持 PNG、JPG、WebP，最大 32 MB</p></div>
+          <button class="button secondary" id="upload-button" type="button">选择图片</button>
           <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp" hidden>
         </div>
         <p id="message" class="message" role="status" aria-live="polite"></p>
       </section>
-      <aside class="controls" aria-label="美化设置">
-        <div class="controls-heading"><h2>画面设置</h2><button type="button" class="text-button" id="reset-button"><span aria-hidden="true">↺</span> 重置</button></div>
-        <section class="control-section background-section"><div class="section-label"><h3>背景</h3><span id="background-name">薄荷微光</span></div>
-          <div class="segmented" role="group" aria-label="背景类型"><button type="button" data-mode="gradient" aria-pressed="true">渐变背景</button><button type="button" data-mode="solid" aria-pressed="false">纯色背景</button></div>
+      <aside class="controls" aria-label="样式设置">
+        <div class="controls-heading"><h2>样式</h2><button type="button" class="text-button" id="reset-button">恢复默认</button></div>
+        <section class="control-section" aria-labelledby="background-heading">
+          <div class="section-label"><h3 id="background-heading">背景</h3><span id="background-name">薄荷微光</span></div>
+          <div class="segmented" role="group" aria-label="背景类型"><button type="button" data-mode="gradient" aria-pressed="true">渐变</button><button type="button" data-mode="solid" aria-pressed="false">纯色</button></div>
           <div id="gradient-options" class="swatches" role="group" aria-label="渐变背景"></div>
           <div id="solid-options" hidden><div id="solid-swatches" class="swatches" role="group" aria-label="纯色背景"></div><label class="custom-color" for="custom-color"><span>自定义颜色</span><span class="color-value" id="color-value">#E1F2EA</span><input type="color" id="custom-color" value="#e1f2ea"></label></div>
         </section>
-        <section class="control-section sliders">
-          <div class="range-control"><label for="padding">图片边距 <output id="padding-value" for="padding">64 px</output></label><input type="range" id="padding" min="0" max="240" step="4" value="64"><div class="range-labels"><span>紧凑</span><span>留白</span></div></div>
-          <div class="range-control"><label for="radius">图片圆角 <output id="radius-value" for="radius">16 px</output></label><input type="range" id="radius" min="0" max="64" step="1" value="16"><div class="range-labels"><span>直角</span><span>圆润</span></div></div>
-          <div class="range-control"><label for="shadow">投影强度 <output id="shadow-value" for="shadow">40%</output></label><input type="range" id="shadow" min="0" max="100" step="1" value="40"><div class="range-labels"><span>无阴影</span><span>更立体</span></div></div>
+        <section class="control-section sliders" aria-label="边距、圆角与投影">
+          <div class="range-control"><label for="padding">边距</label><output id="padding-value" for="padding">64 px</output><input type="range" id="padding" min="0" max="240" step="4" value="64"></div>
+          <div class="range-control"><label for="radius">圆角</label><output id="radius-value" for="radius">16 px</output><input type="range" id="radius" min="0" max="64" step="1" value="16"></div>
+          <div class="range-control"><label for="shadow">投影</label><output id="shadow-value" for="shadow">40%</output><input type="range" id="shadow" min="0" max="100" step="1" value="40"></div>
         </section>
-        <div class="export-section"><div class="export-info"><span>导出格式</span><strong>PNG <span>· 高清无水印</span></strong></div><button class="button primary" id="export-button" type="button" disabled><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4"/></svg><span>导出图片</span></button><p>无需登录，随时保存你的作品</p></div>
+        <div class="export-section"><button class="button primary" id="export-button" type="button" disabled><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v9m-3.8-3.8L10 12l3.8-3.8M4 16h12"/></svg><span>导出 PNG</span></button><p class="export-note">保留原图分辨率，无水印</p></div>
       </aside>
     </div>
-    <section class="how-it-works" aria-label="使用方法"><div><span>01</span><p>放入一张截图</p></div><i aria-hidden="true">→</i><div><span>02</span><p>调成喜欢的样子</p></div><i aria-hidden="true">→</i><div><span>03</span><p>保存，分享出去</p></div></section>
   </main>
-  <footer><span>映框 Snapframe <span class="footer-separator">/</span> 让分享更有质感</span><span>本地处理 <i>·</i> 无需登录 <i>·</i> 免费使用</span></footer>
+  <footer class="site-footer"><div><span>映框 Snapframe，MIT 协议开源</span><a href="https://github.com/dapdap777/snapframe" target="_blank" rel="noopener">GitHub 源码</a></div></footer>
 </body>
 </html>

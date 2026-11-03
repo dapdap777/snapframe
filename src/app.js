@@ -23,7 +23,7 @@ function message(text = '', error = false) {
 function update() {
   try {
     size = render(canvas, image, settings);
-    $('#dimensions').textContent = `${size.width} × ${size.height} px${size.scale < 1 ? ' · 已安全缩放' : ''}`;
+    $('#dimensions').textContent = `${size.width} × ${size.height} px${size.scale < 1 ? '（已安全缩放）' : ''}`;
     $('#preview-label').textContent = isDemo ? '示例效果' : '你的截图';
     exportButton.disabled = exporting || loading;
     return true;
@@ -91,6 +91,22 @@ async function validSignature(file) {
     || (String.fromCharCode(...b.slice(0, 4)) === 'RIFF' && String.fromCharCode(...b.slice(8, 12)) === 'WEBP');
 }
 
+// Resolves once the header is parsed: dimensions are known, pixels are not decoded yet.
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const next = new Image();
+    next.onload = () => resolve(next);
+    next.onerror = reject;
+    next.src = url;
+  });
+}
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+function reveal() {
+  if (reducedMotion.matches || !canvas.animate) return;
+  canvas.animate([{ opacity: 0, transform: 'translateY(6px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(.2, .7, .2, 1)' });
+}
+
 async function loadFile(file) {
   const thisLoad = ++loadId;
   if (!file) return;
@@ -102,21 +118,25 @@ async function loadFile(file) {
     if (thisLoad !== loadId) return;
     message('正在读取图片…');
     url = URL.createObjectURL(file);
-    const next = new Image(); next.src = url;
-    try { await next.decode(); }
-    catch { throw new Error('无法读取图片，文件可能损坏，请换一张试试。'); }
+    const unreadable = '无法读取图片，文件可能损坏，请换一张试试。';
+    let next;
+    try { next = await loadImage(url); }
+    catch { throw new Error(unreadable); }
     if (thisLoad !== loadId) return;
+    // Check dimensions before decode() so an oversized image is rejected without allocating its pixels.
     if (next.naturalWidth > MAX_INPUT_SIDE || next.naturalHeight > MAX_INPUT_SIDE || next.naturalWidth * next.naturalHeight > MAX_INPUT_PIXELS) {
       throw new Error('图片尺寸过大，请使用边长不超过 16,384 px、总像素不超过 4,000 万的图片。');
     }
-    const previousImage = image;
+    try { await next.decode(); }
+    catch { throw new Error(unreadable); }
+    if (thisLoad !== loadId) return;
     // An HTMLImageElement's width/height are initialized from decoded intrinsic dimensions.
     image = next; filename = file.name.replace(/\.[^.]+$/, '') || 'screenshot'; isDemo = false;
-    if (typeof previousImage.close === 'function') previousImage.close();
     $('#file-name').textContent = file.name;
     $('#file-name').title = file.name;
     loading = false;
     if (!update()) return;
+    reveal();
     message(size?.scale < 1 ? '图片已载入。为保证浏览器稳定，导出已缩放至 1,600 万像素以内。' : '图片已载入，调一调就能导出。');
   } catch (error) {
     if (thisLoad === loadId) message(error.message || '无法读取图片，文件可能损坏，请换一张试试。', true);
@@ -131,8 +151,6 @@ function receiveFiles(files) {
   if (files.length === 1) loadFile(files[0]);
 }
 $('#upload-button').addEventListener('click', () => input.click());
-dropZone.addEventListener('click', () => input.click());
-dropZone.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); input.click(); } });
 input.addEventListener('change', () => { receiveFiles(input.files); input.value = ''; });
 let dragDepth = 0;
 dropZone.addEventListener('dragenter', event => { event.preventDefault(); dragDepth++; dropZone.classList.add('dragging'); });
@@ -155,9 +173,9 @@ exportButton.addEventListener('click', async () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a'); link.href = url; link.download = `${filename}-snapframe.png`; document.body.append(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    message('PNG 已生成。手机浏览器如打开图片，请长按保存。');
+    message('PNG 已导出。如果手机浏览器直接打开了图片，长按即可保存。');
   } catch (error) { message(error.message || '导出失败，请稍后重试。', true); }
-  finally { exporting = false; exportButton.disabled = loading; exportButton.querySelector('span').textContent = '导出图片'; }
+  finally { exporting = false; exportButton.disabled = loading; exportButton.querySelector('span').textContent = '导出 PNG'; }
 });
 
 syncControls(); update();

@@ -35,26 +35,37 @@ export function render(canvas, image, settings) {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('当前浏览器无法绘制图片，请换用较新的浏览器。');
   if (settings.mode === 'gradient') {
+    const { colors } = gradients[settings.gradient];
     const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradients[settings.gradient].colors.forEach((color, index) => background.addColorStop(index, color));
+    colors.forEach((color, index) => background.addColorStop(index / Math.max(1, colors.length - 1), color));
     ctx.fillStyle = background;
   } else ctx.fillStyle = settings.color;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.save();
   ctx.scale(size.scale, size.scale);
   const p = settings.padding;
+  const radius = Math.min(settings.radius, image.width / 2, image.height / 2);
   if (settings.shadow > 0) {
     ctx.save();
+    // Paint only the shadow, never the shape casting it, so transparent pixels show the
+    // background whether or not a shadow is on: clip out the image area, then cast from
+    // an off-canvas copy whose shadow is offset back into place.
+    const away = image.width + p * 2;
+    ctx.beginPath();
+    ctx.rect(0, 0, image.width + p * 2, image.height + p * 2);
+    ctx.roundRect(p, p, image.width, image.height, radius);
+    ctx.clip('evenodd');
     // Shadow metrics use output pixels; paths use the scaled logical coordinate system.
     ctx.shadowColor = `rgba(23, 45, 37, ${settings.shadow / 100 * .5})`;
     ctx.shadowBlur = (12 + settings.shadow * .4) * size.scale;
+    ctx.shadowOffsetX = away * size.scale;
     ctx.shadowOffsetY = (4 + settings.shadow * .16) * size.scale;
-    roundedRect(ctx, p, p, image.width, image.height, settings.radius);
-    ctx.fillStyle = '#fff';
+    roundedRect(ctx, p - away, p, image.width, image.height, radius);
+    ctx.fillStyle = '#000';
     ctx.fill();
     ctx.restore();
   }
-  roundedRect(ctx, p, p, image.width, image.height, settings.radius);
+  roundedRect(ctx, p, p, image.width, image.height, radius);
   ctx.clip();
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
