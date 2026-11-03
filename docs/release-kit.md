@@ -12,7 +12,7 @@
 
 体验入口：待上线后补充实际链接。
 
-源码：待公开仓库创建后补充实际链接。
+源码：https://github.com/dapdap777/snapframe
 
 如果它正好能帮你把截图整理得更好看，欢迎试用，也欢迎在 GitHub 点个 Star。
 
@@ -20,7 +20,7 @@
 
 Snapframe is a simple screenshot beautifier with a Chinese interface. Drop in a PNG, JPG, or WebP screenshot, choose a gradient or solid background, adjust padding, rounded corners, and shadow, then export a watermark-free PNG. Images stay in your browser—no uploads or sign-up. Built with plain HTML, CSS, and JavaScript, and released under the MIT license.
 
-Try it: pending deployment. Source: pending repository creation.
+Try it: pending deployment. Source: https://github.com/dapdap777/snapframe
 
 ## 约 30 秒演示脚本
 

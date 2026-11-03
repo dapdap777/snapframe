@@ -24,7 +24,7 @@
 安装 [Node.js](https://nodejs.org/) 22 或更新版本。项目没有运行依赖，无需 `npm install`。
 
 ```sh
-git clone <本仓库的 HTTPS 地址>
+git clone https://github.com/dapdap777/snapframe.git
 cd snapframe
 node scripts/serve.mjs
 ```
