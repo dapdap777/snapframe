@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import urllib.request
 
 from PIL import Image, ImageChops, ImageDraw
 from playwright.sync_api import sync_playwright, expect
@@ -62,7 +63,8 @@ def export_check(page, name):
 
 with sync_playwright() as p:
     edge = Path('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
-    browser = p.chromium.launch(executable_path=str(edge) if edge.exists() else None, headless=True)
+    proxy = urllib.request.getproxies().get('https') if os.environ.get('SNAPFRAME_USE_SYSTEM_PROXY') == '1' else None
+    browser = p.chromium.launch(executable_path=str(edge) if edge.exists() else None, headless=True, proxy={'server':proxy} if proxy else None)
     context = browser.new_context(viewport={'width':1440,'height':1100}, device_scale_factor=1, accept_downloads=True)
     page = context.new_page()
     errors, external, posts = [], [], []

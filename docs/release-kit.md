@@ -1,6 +1,6 @@
 # 发布材料
 
-当前部署状态：等待完成 GitHub 发布和线上验证。下文“体验入口”在部署成功后替换为经实际验证的网址；没有上线前请保留待上线说明。
+已在 GitHub Pages 上线，且在线上地址完成真实浏览器验证。以下内容为待发布草稿，尚未代发到任何社区。
 
 ## 中文技术社区介绍
 
@@ -10,7 +10,7 @@
 
 第一版刻意保持简单：一次处理一张 PNG、JPG 或 WebP 图片，没有批量编辑、云端保存或 AI 修图。大尺寸图片会按安全上限缩放，并在界面提示。源码使用 MIT 协议开放，欢迎反馈问题和贡献改进。
 
-体验入口：待上线后补充实际链接。
+体验入口：https://dapdap777.github.io/snapframe/
 
 源码：https://github.com/dapdap777/snapframe
 
@@ -20,7 +20,7 @@
 
 Snapframe is a simple screenshot beautifier with a Chinese interface. Drop in a PNG, JPG, or WebP screenshot, choose a gradient or solid background, adjust padding, rounded corners, and shadow, then export a watermark-free PNG. Images stay in your browser—no uploads or sign-up. Built with plain HTML, CSS, and JavaScript, and released under the MIT license.
 
-Try it: pending deployment. Source: https://github.com/dapdap777/snapframe
+Try it: https://dapdap777.github.io/snapframe/ · Source: https://github.com/dapdap777/snapframe
 
 ## 约 30 秒演示脚本
 
@@ -33,4 +33,4 @@ Try it: pending deployment. Source: https://github.com/dapdap777/snapframe
 | 22–27 秒 | 展示手机布局和“图片只留在你的浏览器”提示 | 无需登录，图片在本地处理，电脑手机都能用。 |
 | 27–30 秒 | 最终效果与经验证的体验链接、仓库链接 | 映框 Snapframe，开源免费，欢迎体验。 |
 
-录制时使用不含私人信息的截图；最后一屏仅填写实际已可访问的链接。本文件仅为发布草稿，不会自动发到社区。
+录制时使用不含私人信息的截图；最后一屏填写体验入口 https://dapdap777.github.io/snapframe/ 和源码地址 https://github.com/dapdap777/snapframe 。本文件仅为发布草稿，不会自动发到社区。

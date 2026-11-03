@@ -4,7 +4,7 @@
 
 ![映框实际界面](docs/screenshot.png)
 
-> 在线体验：部署尚未完成，当前没有已验证的线上链接。
+**[在线体验 →](https://dapdap777.github.io/snapframe/)** · [源码](https://github.com/dapdap777/snapframe) · [反馈问题](https://github.com/dapdap777/snapframe/issues)
 
 ## 功能
 
@@ -50,7 +50,7 @@ node scripts/serve.mjs dist
 
 ## 验证
 
-已使用 Windows 上的真实 Edge（无头模式）运行端到端检查：
+已使用 Windows 上的真实 Edge（无头模式），在本地构建和实际 GitHub Pages 网站分别运行端到端检查：
 
 - 文件选择、拖拽，以及 PNG / JPG / WebP 解码。
 - 背景和三个参数的画面变化、重置行为。
