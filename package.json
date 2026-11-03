@@ -1,0 +1,14 @@
+{
+  "name": "snapframe",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A browser-local screenshot beautifier with a simple Chinese interface.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs dist"
+  },
+  "engines": { "node": ">=22" },
+  "license": "MIT"
+}
