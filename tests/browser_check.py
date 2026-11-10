@@ -65,7 +65,7 @@ with sync_playwright() as p:
     edge = Path('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
     proxy = urllib.request.getproxies().get('https') if os.environ.get('SNAPFRAME_USE_SYSTEM_PROXY') == '1' else None
     browser = p.chromium.launch(executable_path=str(edge) if edge.exists() else None, headless=True, proxy={'server':proxy} if proxy else None)
-    context = browser.new_context(viewport={'width':1440,'height':1100}, device_scale_factor=1, accept_downloads=True)
+    context = browser.new_context(viewport={'width':1440,'height':1100}, device_scale_factor=1, accept_downloads=True, permissions=['clipboard-read','clipboard-write'])
     page = context.new_page()
     errors, external, posts = [], [], []
     page.on('pageerror', lambda e: errors.append(str(e)))
@@ -167,6 +167,105 @@ with sync_playwright() as p:
     export_check(page,'zero-padding.png')
     page.locator('#reset-button').click()
     record('Zero padding export works')
+
+    # sample.png (960 x 600) at default padding: 1088 x 728. Ratios only grow the canvas and keep the image centred.
+    for ratio,expected in [('1:1','1088 × 1088 px'),('16:9','1294 × 728 px'),('9:16','1088 × 1934 px')]:
+        page.locator(f'[data-ratio="{ratio}"]').click()
+        expect(page.locator('#dimensions')).to_have_text(expected)
+        w,h = canvas_image(page).size
+        assert canvas_image(page).getpixel((w//2,h//2))[:3] == (212,124,88), f'{ratio}: screenshot must stay centred'
+    page.locator('[data-ratio="1:1"]').click()
+    export_check(page,'ratio-square.png')
+    page.locator('[data-ratio="auto"]').click()
+    expect(page.locator('#dimensions')).to_have_text('1088 × 728 px')
+    record('Canvas ratios resize the canvas, keep the screenshot centred, and export exactly')
+
+    # A 960 px wide screenshot gets a 31 px title bar.
+    for frame,bar in [('light',(236,238,240)),('dark',(43,47,52))]:
+        page.locator(f'[data-frame="{frame}"]').click()
+        expect(page.locator('#dimensions')).to_have_text('1088 × 759 px')
+        page.wait_for_function('(c)=>document.querySelector("#preview").getContext("2d").getImageData(264,74,1,1).data[0]===c', arg=bar[0])
+        framed = canvas_image(page)
+        assert framed.getpixel((264,74))[:3] == bar, f'{frame} title bar colour'
+        assert framed.getpixel((83,79))[:3] == (255,95,87), 'Close button'
+        assert framed.getpixel((544,64+31+300))[:3] == (212,124,88), 'Screenshot sits below the title bar'
+    export_check(page,'frame-dark.png')
+    page.locator('[data-frame="none"]').click()
+    expect(page.locator('#dimensions')).to_have_text('1088 × 728 px')
+    record('Light and dark window frames add a title bar above the screenshot')
+
+    page.locator('[data-mode="blur"]').click()
+    page.wait_for_function('()=>{const d=document.querySelector("#preview").getContext("2d").getImageData(2,2,1,1).data;return d[2]>d[0]&&d[3]===255}')
+    blurred = export_check(page,'blur-export.png')
+    for corner in [(0,0),(1087,0),(0,727),(1087,727)]:
+        assert blurred.getpixel(corner)[3] == 255, f'Blurred background must be opaque at {corner}'
+    record('Blurred background is opaque and takes its colour from the screenshot')
+
+    page.locator('[data-mode="transparent"]').click()
+    page.wait_for_function('()=>document.querySelector("#preview").getContext("2d").getImageData(2,2,1,1).data[3]===0')
+    exported = export_check(page,'transparent-export.png')
+    assert exported.getpixel((2,2))[3] == 0, 'PNG keeps the transparent background'
+    assert exported.getpixel((544,364))[:3] == (212,124,88)
+    page.locator('[data-format="jpeg"]').click()
+    expect(page.locator('#export-button')).to_contain_text('导出 JPG')
+    with page.expect_download() as event:
+        page.locator('#export-button').click()
+    jpg_path = OUT/'transparent-export.jpg'
+    event.value.save_as(jpg_path)
+    assert event.value.suggested_filename.endswith('-snapframe.jpg')
+    assert jpg_path.read_bytes()[:3] == b'\xff\xd8\xff'
+    jpg = Image.open(jpg_path).convert('RGB')
+    assert jpg.size == (1088,728)
+    assert min(jpg.getpixel((2,2))) >= 245, 'JPEG flattens a transparent background onto white'
+    page.locator('[data-format="png"]').click()
+    record('Transparent background exports as PNG alpha; JPG export flattens it onto white')
+
+    expect(page.locator('#copy-button')).to_be_visible()
+    page.locator('#copy-button').click()
+    expect(page.locator('#message')).to_contain_text('已复制图片')
+    copied = page.evaluate('''async () => {
+      const [item] = await navigator.clipboard.read();
+      const bitmap = await createImageBitmap(await item.getType('image/png'));
+      return [bitmap.width, bitmap.height];
+    }''')
+    assert copied == [1088,728], copied
+    record('Copy writes the rendered PNG to the clipboard')
+
+    def paste(files):
+        page.evaluate('''files => {
+          const transfer = new DataTransfer();
+          for (const file of files) transfer.items.add(new File([Uint8Array.from(file.bytes)], file.name, {type:file.type}));
+          document.dispatchEvent(new ClipboardEvent('paste', {clipboardData:transfer, bubbles:true, cancelable:true}));
+        }''', files)
+    paste([])
+    expect(page.locator('#message')).to_contain_text('剪贴板里没有图片')
+    paste([{**drag_file(other), 'name':'image.png'}])
+    expect(page.locator('#file-name')).to_contain_text('粘贴的截图')
+    expect(page.locator('#dimensions')).to_have_text('928 × 628 px')
+    with page.expect_download() as event:
+        page.keyboard.press('Control+s')
+    assert event.value.suggested_filename.startswith('粘贴的截图') and event.value.suggested_filename.endswith('-snapframe.png')
+    record('Pasting an image loads it; Ctrl+S exports')
+
+    page.locator('[data-ratio="4:3"]').click()
+    page.locator('[data-frame="dark"]').click()
+    page.locator('#padding').fill('100')
+    page.locator('[data-format="jpeg"]').click()
+    expect(page.locator('#padding-value')).to_have_text('100 px')
+    page.wait_for_function('()=>JSON.parse(localStorage.getItem("snapframe:v1")).settings.padding===100')
+    page.reload(wait_until='networkidle')
+    # Demo 1000 x 640 + 32 px title bar + 100 px padding = 1200 x 872, grown to 4:3.
+    expect(page.locator('#dimensions')).to_have_text('1200 × 900 px')
+    expect(page.locator('#padding')).to_have_value('100')
+    expect(page.locator('[data-ratio="4:3"]')).to_have_attribute('aria-pressed','true')
+    expect(page.locator('[data-frame="dark"]')).to_have_attribute('aria-pressed','true')
+    expect(page.locator('[data-mode="transparent"]')).to_have_attribute('aria-pressed','true')
+    expect(page.locator('#export-button')).to_contain_text('导出 JPG')
+    expect(page.locator('#file-name')).to_have_text('放入你的截图')
+    page.locator('#reset-button').click()
+    page.locator('[data-format="png"]').click()
+    expect(page.locator('#dimensions')).to_have_text('1128 × 768 px')
+    record('Style and export format survive a reload; the image does not')
 
     for width in [390,320]:
         page.set_viewport_size({'width':width,'height':844})

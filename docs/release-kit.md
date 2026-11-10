@@ -6,9 +6,9 @@
 
 每次分享产品截图或写教程，我都想给截图加一点留白、柔和背景和阴影，又不想为一张图打开复杂的设计软件。于是做了「映框 Snapframe」：一个专注截图美化的小网页工具。
 
-拖入一张截图，选择渐变或自定义纯色，再调整边距、圆角和阴影，效果会实时显示。满意后直接下载无水印 PNG。电脑和手机都能打开，不用注册；图片只在浏览器本地处理，不会上传到服务器。
+拖入或直接粘贴一张截图，选择渐变、纯色或取自截图颜色的模糊背景，按需切换 1:1、3:4、16:9 等画布比例，加上 macOS 风格的窗口外框，再调整边距、圆角和阴影，效果会实时显示。满意后一键复制到剪贴板，或下载无水印 PNG / JPG。电脑和手机都能打开，不用注册；图片只在浏览器本地处理，不会上传到服务器。
 
-第一版刻意保持简单：一次处理一张 PNG、JPG 或 WebP 图片，没有批量编辑、云端保存或 AI 修图。大尺寸图片会按安全上限缩放，并在界面提示。源码使用 MIT 协议开放，欢迎反馈问题和贡献改进。
+它刻意保持简单：一次处理一张 PNG、JPG 或 WebP 图片，没有批量编辑、云端保存或 AI 修图。大尺寸图片会按安全上限缩放，并在界面提示。源码使用 MIT 协议开放，欢迎反馈问题和贡献改进。
 
 体验入口：https://dapdap777.github.io/snapframe/
 
@@ -18,7 +18,7 @@
 
 ## Short English introduction
 
-Snapframe is a simple screenshot beautifier with a Chinese interface. Drop in a PNG, JPG, or WebP screenshot, choose a gradient or solid background, adjust padding, rounded corners, and shadow, then export a watermark-free PNG. Images stay in your browser—no uploads or sign-up. Built with plain HTML, CSS, and JavaScript, and released under the MIT license.
+Snapframe is a simple screenshot beautifier with a Chinese interface. Drop in or paste a PNG, JPG, or WebP screenshot, choose a gradient, solid, blurred, or transparent background, pick a canvas ratio and an optional window frame, adjust padding, rounded corners, and shadow, then copy it to the clipboard or export a watermark-free PNG or JPG. Images stay in your browser—no uploads or sign-up. Built with plain HTML, CSS, and JavaScript, and released under the MIT license.
 
 Try it: https://dapdap777.github.io/snapframe/ · Source: https://github.com/dapdap777/snapframe
 
