@@ -21,9 +21,15 @@ let exporting = false;
 let loading = false;
 let size;
 
+// A transient toast: success notes fade after a few seconds, errors linger longer.
+let messageTimer = 0;
 function message(text = '', error = false) {
-  $('#message').textContent = text;
-  $('#message').classList.toggle('error', error);
+  const box = $('#message');
+  clearTimeout(messageTimer);
+  box.textContent = text;
+  box.classList.toggle('error', error);
+  box.toggleAttribute('data-show', Boolean(text));
+  if (text && !text.endsWith('…')) messageTimer = setTimeout(() => box.removeAttribute('data-show'), error ? 6000 : 3200);
 }
 
 function setButtons(disabled = exporting || loading) {
@@ -140,7 +146,11 @@ frames.forEach(frame => {
 document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => { settings.mode = button.dataset.mode; changed(); }));
 document.querySelectorAll('[data-format]').forEach(button => button.addEventListener('click', () => { format = button.dataset.format; syncControls(); persist(); }));
 for (const key of ['padding', 'radius', 'shadow']) {
-  $(`#${key}`).addEventListener('input', event => { settings[key] = Number(event.target.value); changed(); });
+  const range = $(`#${key}`);
+  range.addEventListener('input', () => { settings[key] = Number(range.value); changed(); });
+  // Double-click a slider to put just that value back.
+  range.addEventListener('dblclick', () => { settings[key] = defaults[key]; changed(); });
+  range.title = '双击恢复默认值';
 }
 $('#custom-color').addEventListener('input', event => { settings.color = event.target.value; changed(); });
 $('#reset-button').addEventListener('click', () => {
@@ -215,17 +225,24 @@ function receiveFiles(files) {
   if (files.length === 1) loadFile(files[0]);
 }
 $('#upload-button').addEventListener('click', () => input.click());
+canvas.addEventListener('click', () => input.click());
 input.addEventListener('change', () => { receiveFiles(input.files); input.value = ''; });
+// The whole page is a drop target; the stage shows the cue. Dropping never navigates away.
 let dragDepth = 0;
-dropZone.addEventListener('dragenter', event => { event.preventDefault(); dragDepth++; dropZone.classList.add('dragging'); });
-dropZone.addEventListener('dragover', event => { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; });
-dropZone.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) dropZone.classList.remove('dragging'); });
-dropZone.addEventListener('drop', event => {
-  event.preventDefault(); dragDepth = 0; dropZone.classList.remove('dragging'); receiveFiles(event.dataTransfer.files);
+const carriesFiles = event => [...(event.dataTransfer?.types || [])].includes('Files');
+window.addEventListener('dragenter', event => {
+  if (!carriesFiles(event)) return;
+  event.preventDefault(); dragDepth++; dropZone.classList.add('dragging');
 });
-// Prevent dropping outside the upload zone from navigating away and losing the current edit.
-window.addEventListener('dragover', event => event.preventDefault());
-window.addEventListener('drop', event => event.preventDefault());
+window.addEventListener('dragover', event => {
+  event.preventDefault();
+  if (carriesFiles(event)) event.dataTransfer.dropEffect = 'copy';
+});
+window.addEventListener('dragleave', event => { if (!carriesFiles(event)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) dropZone.classList.remove('dragging'); });
+window.addEventListener('drop', event => {
+  event.preventDefault(); dragDepth = 0; dropZone.classList.remove('dragging');
+  if (event.dataTransfer?.files.length) receiveFiles(event.dataTransfer.files);
+});
 
 function isTextField(target) {
   return target instanceof HTMLElement && (target.isContentEditable || target.matches('textarea, input:not([type=range], [type=color], [type=button], [type=file])'));
